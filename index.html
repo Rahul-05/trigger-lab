@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigger Lab — Forecast-based financing trigger calibration workbench</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>TRIGGER LAB</h1>
+      <div class="sub">Forecast-based financing — trigger calibration workbench</div>
+      <nav class="no-print">
+        <a href="#workbench">Workbench</a>
+        <a href="#method-note" id="method-nav">Method</a>
+        <a href="#annex-panel">Annex</a>
+        <button class="btn-quiet" id="method-toggle" type="button">Show method note</button>
+      </nav>
+    </div>
+    <div class="meta" id="masthead-meta">Teso, Uganda · Magoro · 2009–2014 · GloFAS v4</div>
+  </header>
+
+  <!-- Basin / site picker bar -->
+  <div class="picker" id="workbench">
+    <div>
+      <label class="field" for="basin-select">Basin</label>
+      <select id="basin-select"></select>
+      <p class="hint">A basin with no assembled data is shown as forthcoming and cannot be selected into a result.</p>
+    </div>
+    <div>
+      <label class="field" for="site-select">Site</label>
+      <select id="site-select"></select>
+      <p class="hint" id="site-note">Changing site recomputes the whole page.</p>
+    </div>
+  </div>
+
+  <div id="method-note" hidden>
+    <h3>Method note</h3>
+    <p>Method: Coughlan de Perez et al. (NHESS 2015; HESS 2016), forecast-based financing trigger verification for Teso, Uganda. This workbench reproduces the verification with GloFAS v4 reforecast data (2009–2014) and DesInventar impact records. Verification here compares the GloFAS v4 forecast proxy against its own historical run, not against independent ground truth. See the caveat panel below for the drift register.</p>
+  </div>
+
+  <!-- Caveat / drift panel: full width, directly below the picker, above all results. Expanded by default, never dismissible. -->
+  <section class="caveat" id="caveat-panel" aria-labelledby="caveat-title">
+    <div class="summary-bar">Model-vs-model — not ground truth. <button class="btn-quiet" type="button" onclick="document.getElementById('caveat-panel').classList.remove('collapsed');document.getElementById('caveat-toggle').textContent='Collapse';">Expand</button></div>
+    <div class="caveat-body">
+      <h2 id="caveat-title">Read this before using these numbers</h2>
+      <p><strong>Model-vs-model — not ground truth:</strong> verification compares the GloFAS v4 lead-24h forecast proxy against its own consolidated historical run, not against independent ground truth.</p>
+      <p>Gauge correlation: <strong>not computable — gauge series not open</strong>. The PAPER gauge correlation of 0.52 is not reproduced here and no number is shown for it.</p>
+      <div class="drift">
+        <h3 style="margin:8px 0">Drift register — what changed between the paper and this run</h3>
+        <table>
+          <thead><tr><th>Item</th><th>Paper</th><th>This run</th><th>What it can and cannot change</th></tr></thead>
+          <tbody>
+            <tr><td>Ensemble members</td><td>51</td><td>11</td><td>Triggers quantise to effective 36/55/73% instead of the nominal 30/50/70%. It changes the resolution of the trigger, not the danger level.</td></tr>
+            <tr><td>Initialisations</td><td>Daily</td><td>Monday / Thursday</td><td>Fewer scored initialisations per action window. It changes n, not the definition of a hit.</td></tr>
+            <tr><td>Lead</td><td>Lead-0</td><td>24h proxy</td><td>The proxy stands in for the forecast at the action lead. It cannot confirm what a live forecast would have shown.</td></tr>
+            <tr><td>Grid / model</td><td>Pre-operational 0.1°</td><td>v4.0 0.05° LISFLOOD / ERA5</td><td>Danger levels are computed on a different grid and model version. Levels are not directly interchangeable with the paper's levels.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3 style="margin:8px 0">DesInventar note</h3>
+      <p>District flood years present 2010–2014. The sub-county Magoro record has no 2011 event; the paper used additional non-public Red Cross records. Nothing in this workbench is re-based on that difference. Record years from the embedded data:</p>
+      <ul id="desinventar-lines"></ul>
+      <p class="no-print"><button class="btn-quiet" id="caveat-toggle" type="button">Collapse</button> — collapsing keeps the one-line summary above visible; this panel cannot be dismissed.</p>
+    </div>
+  </section>
+
+  <!-- Forthcoming basin empty state: no numbers of any kind -->
+  <section class="empty" id="forthcoming-panel" hidden>
+    <h2 id="forthcoming-name">Basin forthcoming</h2>
+    <p>No verification computed yet. Data assembly for this basin has not begun.</p>
+    <p>Expected sources, when assembly begins: GloFAS reforecast and historical runs for the basin, and the corresponding DesInventar impact records. No table, chart, or metric is shown until data are assembled.</p>
+  </section>
+
+  <div class="main">
+    <!-- Control rail: 300px -->
+    <div class="controls-col">
+      <details class="panel controls" open>
+        <summary id="controls-summary">Calibration controls — 50%, all lead times</summary>
+        <div style="margin-top:16px">
+          <h2>Calibration controls</h2>
+          <label class="field" for="lead-select">Lead-time filter</label>
+          <select id="lead-select">
+            <option value="all">All lead times</option>
+            <option value="4">4-day lead only</option>
+            <option value="7">7-day lead only</option>
+          </select>
+          <p class="hint">4-day shows water storage &amp; purification and water drainage. 7-day shows food storage only.</p>
+
+          <label class="field" for="action-select">Action</label>
+          <select id="action-select"></select>
+          <p class="hint">Action definitions (paper Table 1, fixed): water storage &amp; purification — 4-day lead, 30-day lifetime; water drainage (trenches) — 4-day lead, 90-day lifetime; food storage — 7-day lead, 30-day lifetime.</p>
+
+          <fieldset>
+            <legend class="field" style="padding:0">Trigger threshold <span class="val" id="trigger-value">— discrete steps only</span></legend>
+            <div class="radio-row"><input type="radio" name="trigger" id="trig30" value="0.30"><label for="trig30"><span class="swatch c" style="background:#6FA3B8"></span> 30% ensemble exceedance</label></div>
+            <div class="radio-row"><input type="radio" name="trigger" id="trig50" value="0.50" checked><label for="trig50"><span class="swatch s" style="background:#2A6B8A"></span> 50% ensemble exceedance</label></div>
+            <div class="radio-row"><input type="radio" name="trigger" id="trig70" value="0.70"><label for="trig70"><span class="swatch t"></span> 70% ensemble exceedance</label></div>
+            <p class="hint">No slider is used for thresholds: a slider would imply a continuum the verification does not support. With 11 ensemble members, nominal 30/50/70% quantise to effective 36/55/73%.</p>
+          </fieldset>
+
+          <label class="field" for="cl-slider">Cost-loss ratio (C/L) <span class="val" id="cl-value">0.20</span></label>
+          <input type="range" id="cl-slider" min="1" max="99" value="20" step="1">
+          <p class="hint">C/L is continuous, so a slider is used here. Cost-loss curves are computed from the displayed contingency counts, not measured data.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- Results column -->
+    <div id="results-col">
+      <section class="panel">
+        <h2 id="site-heading">Magoro — Water storage &amp; purification</h2>
+        <p class="hint" id="selection-line"></p>
+        <div class="readouts">
+          <div class="readout"><div class="lbl">POD</div><div class="num" id="readout-pod">—</div><div class="ci" id="readout-pod-ci"></div></div>
+          <div class="readout"><div class="lbl">Pair FAR</div><div class="num" id="readout-far">—</div><div class="ci" id="readout-far-ci"></div></div>
+          <div class="readout"><div class="lbl">Operational FAR</div><div class="num" id="readout-opfar">—</div><div class="ci" id="readout-opfar-ci"></div></div>
+          <div class="readout"><div class="lbl">Cost-loss value at selected C/L</div><div class="num" id="readout-value">—</div><div class="ci" id="readout-value-ci"></div></div>
+        </div>
+
+        <h3>Danger level and exceedance — this run alongside PAPER</h3>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Measure</th><th>This run</th><th>Interval / n</th><th>PAPER comparison</th></tr></thead>
+          <tbody>
+            <tr><td class="txt">Danger level, 95th percentile, proxy</td><td id="danger-proxy">—</td><td class="txt" id="danger-proxy-n"></td><td class="txt">— No record</td></tr>
+            <tr><td class="txt">Danger level, 95th percentile, historical run</td><td id="danger-hist">—</td><td class="txt" id="danger-hist-n"></td><td class="txt">— No record</td></tr>
+            <tr><td class="txt">Exceedance years, historical 95th percentile</td><td class="txt" id="exceed-years">—</td><td class="txt">n = 2,191 historical days</td><td class="txt" id="exceed-years-paper">—</td></tr>
+            <tr><td class="txt">Proxy vs historical correlation</td><td id="proxy-corr">—</td><td class="txt" id="proxy-corr-n"></td><td class="txt">Gauge correlation (PAPER): <span id="gauge-corr"></span></td></tr>
+          </tbody>
+        </table></div>
+
+        <h3>Verification table — selected action, all thresholds</h3>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Threshold</th><th>Lead time</th><th>Hits</th><th>Misses</th><th>False alarms</th><th>Correct negatives</th><th>POD</th><th>Pair FAR</th><th>POFD</th><th>Operational FAR</th><th>Actions hit / total</th><th>Value at selected C/L</th><th>n scored</th></tr></thead>
+          <tbody id="verify-body"></tbody>
+        </table></div>
+        <p class="provenance" id="verify-note"></p>
+
+        <h3>Sensitivity — danger level by percentile</h3>
+        <div class="table-wrap"><table class="data">
+          <thead><tr><th>Percentile</th><th>Level (proxy)</th><th>Exceedance days</th><th>Exceedance years, this run</th><th>PAPER comparison</th></tr></thead>
+          <tbody id="sens-body"></tbody>
+        </table></div>
+        <p class="provenance">Sensitivity levels are the proxy percentiles from the source results. Units are as reported in results.json. PAPER exceedance years 2010–2012 are shown at the 95th percentile row only, as the paper's headline comparison.</p>
+
+        <h3>Bootstrap — P(FAR &gt; 0.5)</h3>
+        <p>Value: <span class="mono" id="boot-p">—</span> · <span id="boot-ci"></span></p>
+        <p id="boot-paper"></p>
+        <p class="provenance" id="boot-note"></p>
+      </section>
+
+      <div class="charts">
+        <section class="panel chart-card">
+          <h3>POD and pair FAR across thresholds</h3>
+          <p class="subtitle" id="podfar-subtitle"></p>
+          <div id="chart-podfar"></div>
+          <ul id="podfar-values" style="font-size:12px;color:#44524B"></ul>
+        </section>
+        <section class="panel chart-card">
+          <h3>Cost-loss curves</h3>
+          <p class="subtitle" id="costloss-subtitle"></p>
+          <p class="subtitle">Expense ratio vs C/L (climatology reference dotted; optimum = hollow diamond).</p>
+          <div id="chart-expense"></div>
+          <p class="subtitle">Relative value vs C/L (zero-value reference dotted; optimum = hollow diamond).</p>
+          <div id="chart-value"></div>
+          <p class="provenance" id="costloss-note"></p>
+        </section>
+      </div>
+
+      <!-- Annex export panel, full width of the results column -->
+      <section class="panel annex" id="annex-panel">
+        <h2 id="annex-title">Early Action Protocol — trigger annex (draft)</h2>
+        <p><strong>DRAFT — for agency review, not an operational trigger until adopted.</strong> The annex below is exactly what the download contains, including the caveat and drift register.</p>
+        <div class="btn-row no-print" style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn-primary" id="annex-download" type="button">Download draft annex (.md)</button>
+          <button class="btn-secondary" id="annex-print" type="button">Print / save as PDF</button>
+        </div>
+        <pre id="annex-preview" style="white-space:pre-wrap;font-family:ui-monospace, Menlo, monospace;font-size:12px;line-height:1.5;border:1px solid #CFC9BC;padding:16px;overflow-x:auto"></pre>
+        <p class="provenance">Source files: data/glofas/teso_v4/results.json · GloFAS v4 · 2009–2014 · cost-loss formula: core/triggerlab/costloss.py · Method: Coughlan de Perez et al. (NHESS 2015; HESS 2016).</p>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="print-footer"><span id="print-footer-text"></span></div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
