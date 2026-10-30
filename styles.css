@@ -102,9 +102,80 @@ code.mono{font-size:12px}
   .masthead .meta{text-align:left;white-space:normal}
   details.controls>summary{font-weight:700;cursor:pointer}
 }
+/* View toggle + place search */
+.view-toggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.view-btn{font-family:var(--sans);font-size:14px;font-weight:700;min-height:44px;padding:0 18px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:2px}
+.view-btn.active{background:var(--river);color:#fff;border-color:var(--river)}
+.view-hint{margin:0}
+.search-row{display:flex;gap:8px}
+.search-row input{flex:1;min-width:0}
+.search-row button{flex:none}
+
+/* Touch targets: every control is at least 44px tall */
+button{min-height:44px}
+select{min-height:44px}
+.radio-row{min-height:44px;align-items:center}
+input[type=range]{height:44px}
+
+/* Simple view */
+.story{font-size:16px;line-height:1.7}
+.story p{margin:0 0 10px}
+.gauge{margin:12px 0 4px}
+.gauge-tube{position:relative;width:72px;height:190px;border:2px solid var(--ink);border-radius:2px 2px 0 0;background:var(--paper);overflow:visible}
+.gauge-water{position:absolute;left:0;right:0;bottom:0;height:0;background:var(--river);transition:height 1.2s ease}
+.gauge-on .gauge-water{height:78%}
+.gauge-line{position:absolute;left:-10px;right:-10px;bottom:78%;border-top:2px dashed var(--danger-border)}
+.gauge-label{position:absolute;left:0;bottom:8px;white-space:nowrap;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--danger-text)}
+.timeline{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tl-year{font-family:var(--mono);font-size:14px;padding:8px 12px;border:1px solid var(--rule);background:var(--paper);color:var(--ink-2)}
+.tl-year.ex{background:var(--river);color:#fff;border-color:var(--river);font-weight:700}
+.tl-year.user{border-style:dashed;border-width:2px;border-color:var(--far)}
+.tl-year.ex.user{outline:2px dashed var(--far);outline-offset:2px}
+.count-group{border:1px solid var(--rule);padding:12px;margin-bottom:12px}
+.count-group.selected{border-color:var(--river);border-width:2px}
+.count-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.count-label{width:96px;flex:none;font-weight:700;font-size:13px}
+.count-bar{flex:1;height:16px;background:var(--surface-warm)}
+.count-bar span{display:block;height:100%;background:var(--river)}
+.count-num{font-family:var(--mono);font-weight:700;min-width:32px;text-align:right}
+.count-note{font-size:12px;color:var(--ink-2);flex:2}
+.danger-box{background:var(--danger-bg);border:1px solid var(--danger-border);color:var(--danger-text);padding:12px;margin:12px 0;font-size:14px}
+#byo-file{font-size:14px;margin:8px 0}
+
+/* Mobile: stacked single column, cards instead of wide tables */
+@media (max-width:600px){
+  .wrap{padding:12px}
+  .masthead h1{font-size:24px}
+  .picker{flex-direction:column;flex-wrap:nowrap}
+  .readouts{grid-template-columns:1fr}
+  .btn-row button{flex:1 1 100%}
+  .count-row{flex-wrap:wrap}
+  .count-note{flex-basis:100%;margin-left:106px}
+  .gauge-label{white-space:normal;max-width:180px}
+  /* Results tables become cards: each row is a card, each cell carries its column label. */
+  table.data,table.data tbody{display:block;width:100%}
+  table.data thead{display:none}
+  table.data tr{display:block;border:1px solid var(--rule);border-radius:2px;margin-bottom:12px;padding:4px 12px}
+  table.data td{display:flex;justify-content:space-between;gap:12px;text-align:right;border-bottom:none;padding:6px 0;white-space:normal}
+  table.data td::before{content:attr(data-label);font-family:var(--sans);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);text-align:left}
+  table.data tr.selected{background:var(--river-pale)}
+  .caveat{overflow-x:auto}
+  .caveat table{font-size:12px}
+}
+@media (max-width:390px){
+  .wrap{padding:10px}
+  .masthead h1{font-size:22px}
+  .readout .num{font-size:24px}
+  .count-label{width:84px}
+  .count-note{margin-left:94px}
+}
+@media (prefers-reduced-motion:reduce){
+  .gauge-water{transition:none}
+  .gauge-on .gauge-water{height:78%}
+}
 @media print{
   body{background:#fff;color:#000}
-  .picker,.controls-col,.no-print,button,nav,.btn-row{display:none !important}
+  .picker,.controls-col,.no-print,button,nav,.btn-row,.view-toggle,#simple-view,#search-empty-panel{display:none !important}
   .wrap{max-width:none;padding:0}
   .main{display:block}
   .panel,.readout,.caveat{border-color:#000}

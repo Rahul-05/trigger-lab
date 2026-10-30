@@ -242,3 +242,83 @@ as zero, or show a forthcoming basin as if computed; issue verdicts ("safe,"
 "AI-powered"); depend on paid fonts, stock imagery, external assets, accounts, or
 billing — system stacks and inline SVG only; add a feature that hides the method:
 every computed number must trace, on the same page, to its source files and version.
+
+## 7. Simple view, place search, mobile, and porting (added October 30, 2026)
+
+These patterns extend the system above; they do not replace it. The caveat
+panel, drift register, and no-verdict rule apply identically in both views,
+and every number in Simple view traces to the same embedded data as the
+technical view.
+
+### Simple view
+- A Technical / Simple toggle sits above the picker. Both views share one
+  page, one control rail, and one data object; switching views never
+  recomputes or changes a number. The technical view is unchanged.
+- Simple translates without dumbing down: the danger level is explained as
+  "the river-flow level used here to mark a flood worth acting on";
+  caught / missed / false alarm are defined in one clause each ("forecast
+  warned and the river crossed" / "river crossed but no warning" / "warning
+  but the river did not cross"); cost-loss is stated as spend per 100 units
+  of flood damage, with the value as "the share of the gap between preparing
+  every time and perfect foresight that the forecast route closes."
+- The exceedance timeline shows one chip per study-window year; crossing
+  years are filled river-teal, user-supplied years are dashed amber, a year
+  in both gets both treatments. Years outside the study window are listed
+  in text, never plotted.
+- The river gauge is schematic, not a recording: a tube with a dashed
+  danger line labelled with the real danger value, and water that rises to
+  the line. The caption always says the animation is illustrative. This is
+  the one sanctioned exception to "charts never animate on load": the gauge
+  animates once on entering Simple view (a control-state change), and
+  `prefers-reduced-motion` renders it statically at the final level.
+- Simple view is hidden in print; the annex remains the printable record.
+
+### Place search
+- One search box in the picker, resolved only over a built-in gazetteer
+  (basin and site names plus variant spellings; no live geocoder, no keys).
+  Bare country names deliberately do not resolve — a country is not a basin.
+- A packed basin resolves fully (a site name also selects that site). A
+  planned basin resolves to its forthcoming state. Any other name gets an
+  honest empty state naming what a pack for that place would require
+  (pour point, sequential GloFAS pull, impact records) and that it can be
+  requested. No numbers are ever shown for an unmatched or unpacked place.
+
+### Mobile
+- Below 600px the layout is a single column: picker stacks, readouts stack
+  to one column, charts already stack from 900px. Below 390px padding and
+  readout sizes tighten further.
+- Every touch target is at least 44px tall (buttons, selects, radio rows,
+  the range input). Charts are fluid by viewBox and need no special casing.
+- Results tables become cards on phones: each row is a bordered card and
+  each cell carries its column label via a `data-label` attribute rendered
+  as a small caps prefix. The caveat drift table keeps horizontal scroll
+  (it is reference text, not results).
+- Layout at 360px and 390px is verified by CSS review plus DOM behaviour
+  checks; a real-browser visual check is not possible from the build VM
+  (the managed browser cannot reach VM localhost and blocks the file host),
+  so the live Pages URL is the eyeball step.
+
+### Data porting
+- A pack is one basin's assembled data, described by `workbench/pack.json`:
+  basin id, display name, per-site pour-point lat/lon (target + snapped),
+  catchment area, data sources, licence notes, file list, status.
+- The full pipeline (basin config → sequential EWDS pull → extract_points
+  → reproduce → pack JSON → basin-list registration) is documented in
+  PACKING.md, including the licence facts: CEMS-FLOODS data may be
+  redistributed with attribution; EM-DAT data may never be in a pack.
+- The workbench offers a basin data download (CSV verification rows, JSON
+  site object) from the embedded data, and a bring-your-own impact-records
+  overlay: client-side CSV parse only, never uploaded, marked
+  user-supplied on the timeline, never included in the annex or any
+  download. Unparseable lines are shown in the danger-styled error box
+  and skipped.
+
+### Rendering rules added with this pass
+- Reference labels inside charts are right-aligned within the viewBox
+  (`text-anchor: end`) so full text such as "Climatology (dotted)" is never
+  cut off at the panel edge.
+- Percentiles use true ordinals (93rd, 95th, 99th), never a blanket "th".
+- An explicit 0.0 is always rendered as a number (e.g. "0.0000"). A missing
+  value renders as "— (no record)", never as a blank. The bootstrap value
+  uses this rule explicitly, because a blank beside a present CI reads as a
+  dropped number.

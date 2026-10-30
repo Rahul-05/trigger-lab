@@ -23,6 +23,13 @@
     <div class="meta" id="masthead-meta">Teso, Uganda · Magoro · 2009–2014 · GloFAS v4</div>
   </header>
 
+  <!-- View toggle: same data, same numbers — Simple explains them in plain words and pictures. -->
+  <div class="view-toggle no-print" role="group" aria-label="View">
+    <button type="button" id="view-technical" class="view-btn active" aria-pressed="true">Technical view</button>
+    <button type="button" id="view-simple" class="view-btn" aria-pressed="false">Simple view</button>
+    <span class="hint view-hint">Same data, same numbers — Simple explains them in plain words and pictures. The caveat panel stays visible in both views.</span>
+  </div>
+
   <!-- Basin / site picker bar -->
   <div class="picker" id="workbench">
     <div>
@@ -34,6 +41,14 @@
       <label class="field" for="site-select">Site</label>
       <select id="site-select"></select>
       <p class="hint" id="site-note">Changing site recomputes the whole page.</p>
+    </div>
+    <div>
+      <label class="field" for="place-search">Find a place</label>
+      <div class="search-row">
+        <input type="search" id="place-search" placeholder="e.g. Magoro, Karnali, Piura" autocomplete="off" aria-label="Find a place">
+        <button class="btn-secondary" id="place-search-btn" type="button">Search</button>
+      </div>
+      <p class="hint" id="search-note">Searches packed and planned basins only. No live map, no data invented.</p>
     </div>
   </div>
 
@@ -75,6 +90,14 @@
     <p>Expected sources, when assembly begins: GloFAS reforecast and historical runs for the basin, and the corresponding DesInventar impact records. No table, chart, or metric is shown until data are assembled.</p>
   </section>
 
+  <!-- Place-search empty state: no numbers of any kind for an unmatched place -->
+  <section class="empty" id="search-empty-panel" hidden>
+    <h2 id="search-empty-title">No data pack for this place</h2>
+    <p id="search-empty-body"></p>
+    <p>A pack for a new place would need: a basin pour point (latitude and longitude), a sequential GloFAS pull for that basin, and impact records for its flood years. A pack can be requested — contact the Trigger Lab team with the basin name and pour point. Nothing is shown for this place until its pack is assembled.</p>
+    <button class="btn-secondary" id="search-empty-clear" type="button">Back to current basin</button>
+  </section>
+
   <div class="main">
     <!-- Control rail: 300px -->
     <div class="controls-col">
@@ -111,7 +134,7 @@
 
     <!-- Results column -->
     <div id="results-col">
-      <section class="panel">
+      <section class="panel" id="tech-results">
         <h2 id="site-heading">Magoro — Water storage &amp; purification</h2>
         <p class="hint" id="selection-line"></p>
         <div class="readouts">
@@ -125,10 +148,10 @@
         <div class="table-wrap"><table class="data">
           <thead><tr><th>Measure</th><th>This run</th><th>Interval / n</th><th>PAPER comparison</th></tr></thead>
           <tbody>
-            <tr><td class="txt">Danger level, 95th percentile, proxy</td><td id="danger-proxy">—</td><td class="txt" id="danger-proxy-n"></td><td class="txt">— No record</td></tr>
-            <tr><td class="txt">Danger level, 95th percentile, historical run</td><td id="danger-hist">—</td><td class="txt" id="danger-hist-n"></td><td class="txt">— No record</td></tr>
-            <tr><td class="txt">Exceedance years, historical 95th percentile</td><td class="txt" id="exceed-years">—</td><td class="txt">n = 2,191 historical days</td><td class="txt" id="exceed-years-paper">—</td></tr>
-            <tr><td class="txt">Proxy vs historical correlation</td><td id="proxy-corr">—</td><td class="txt" id="proxy-corr-n"></td><td class="txt">Gauge correlation (PAPER): <span id="gauge-corr"></span></td></tr>
+            <tr><td class="txt" data-label="Measure">Danger level, 95th percentile, proxy</td><td id="danger-proxy" data-label="This run">—</td><td class="txt" id="danger-proxy-n" data-label="Interval / n"></td><td class="txt" data-label="PAPER comparison">— No record</td></tr>
+            <tr><td class="txt" data-label="Measure">Danger level, 95th percentile, historical run</td><td id="danger-hist" data-label="This run">—</td><td class="txt" id="danger-hist-n" data-label="Interval / n"></td><td class="txt" data-label="PAPER comparison">— No record</td></tr>
+            <tr><td class="txt" data-label="Measure">Exceedance years, historical 95th percentile</td><td class="txt" id="exceed-years" data-label="This run">—</td><td class="txt" data-label="Interval / n">n = 2,191 historical days</td><td class="txt" id="exceed-years-paper" data-label="PAPER comparison">—</td></tr>
+            <tr><td class="txt" data-label="Measure">Proxy vs historical correlation</td><td id="proxy-corr" data-label="This run">—</td><td class="txt" id="proxy-corr-n" data-label="Interval / n"></td><td class="txt" data-label="PAPER comparison">Gauge correlation (PAPER): <span id="gauge-corr"></span></td></tr>
           </tbody>
         </table></div>
 
@@ -152,7 +175,7 @@
         <p class="provenance" id="boot-note"></p>
       </section>
 
-      <div class="charts">
+      <div class="charts" id="tech-charts">
         <section class="panel chart-card">
           <h3>POD and pair FAR across thresholds</h3>
           <p class="subtitle" id="podfar-subtitle"></p>
@@ -170,6 +193,45 @@
         </section>
       </div>
 
+      <!-- Simple view: same data, same numbers, plain words and pictures. -->
+      <section class="panel" id="simple-view" hidden>
+        <h2 id="simple-heading">—</h2>
+        <p class="hint" id="simple-selection"></p>
+        <div id="simple-story" class="story"></div>
+
+        <h3>What the danger line means</h3>
+        <div class="gauge" aria-label="Schematic river gauge">
+          <div class="gauge-tube">
+            <div class="gauge-water" id="gauge-water"></div>
+            <div class="gauge-line"><span class="gauge-label" id="gauge-label"></span></div>
+          </div>
+          <p class="hint" id="gauge-caption"></p>
+        </div>
+        <p class="hint">The animation is schematic: it shows what crossing the danger line means, not a recorded flood. The line is placed at the danger level for this site; the water rising to it is illustrative.</p>
+
+        <h3>Years the river crossed the danger line</h3>
+        <div id="simple-timeline" class="timeline"></div>
+        <p class="hint" id="simple-timeline-note"></p>
+        <p class="hint">The timeline shows model exceedance years (the river level in the historical run crossing the 95th-percentile line), not the flood record. District flood records exist for 2010–2014; the Magoro sub-county record has no 2011 event — see the caveat panel.</p>
+
+        <h3>What each trigger would have done</h3>
+        <p class="hint">Caught means the forecast warned and the river crossed. Missed means the river crossed but there was no warning. False alarm means there was a warning but the river did not cross. Counts are checked forecast occasions, not floods.</p>
+        <div id="simple-counts"></div>
+
+        <h3>What acting costs — in plain words</h3>
+        <p id="simple-cost"></p>
+
+        <h3>How this compares with the paper</h3>
+        <p id="simple-paper"></p>
+
+        <h3>Your own flood years (optional)</h3>
+        <p class="hint">Add your own list of flood years as a CSV file with a year column. It stays in your browser, is never uploaded, is marked as user-supplied on the timeline, and is not included in the annex download.</p>
+        <input type="file" id="byo-file" accept=".csv,text/csv" aria-label="Upload your own flood years as CSV">
+        <div id="byo-errors" class="danger-box" hidden></div>
+        <p id="byo-summary" class="hint"></p>
+        <button class="btn-secondary" id="byo-clear" type="button">Remove my flood years</button>
+      </section>
+
       <!-- Annex export panel, full width of the results column -->
       <section class="panel annex" id="annex-panel">
         <h2 id="annex-title">Early Action Protocol — trigger annex (draft)</h2>
@@ -177,6 +239,8 @@
         <div class="btn-row no-print" style="display:flex;gap:12px;flex-wrap:wrap">
           <button class="btn-primary" id="annex-download" type="button">Download draft annex (.md)</button>
           <button class="btn-secondary" id="annex-print" type="button">Print / save as PDF</button>
+          <button class="btn-secondary" id="data-download-csv" type="button">Download basin data (CSV)</button>
+          <button class="btn-secondary" id="data-download-json" type="button">Download basin data (JSON)</button>
         </div>
         <pre id="annex-preview" style="white-space:pre-wrap;font-family:ui-monospace, Menlo, monospace;font-size:12px;line-height:1.5;border:1px solid #CFC9BC;padding:16px;overflow-x:auto"></pre>
         <p class="provenance">Source files: data/glofas/teso_v4/results.json · GloFAS v4 · 2009–2014 · cost-loss formula: core/triggerlab/costloss.py · Method: Coughlan de Perez et al. (NHESS 2015; HESS 2016).</p>
